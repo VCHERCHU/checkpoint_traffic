@@ -1,0 +1,71 @@
+{
+  "_note": "Camera roles were established by visually inspecting one daylight frame from each camera on 2026-08-26. LTA burns direction labels into the images; the analysis prompt relies on those labels rather than on hardcoded carriageway geometry. Night behaviour is NOT verified - the model reports image_quality per run and the client falls back to patterns when confidence is low.",
+
+  "checkpoints": {
+    "woodlands": {
+      "name": "Woodlands Checkpoint",
+      "short": "Woodlands",
+      "crossing": "Causeway",
+      "coords": [1.44555, 103.76834],
+      "cameras": ["2702", "2701", "2704"]
+    },
+    "tuas": {
+      "name": "Tuas Checkpoint",
+      "short": "Tuas",
+      "crossing": "Second Link",
+      "coords": [1.34765, 103.63670],
+      "cameras": ["4713", "4703", "4712"]
+    }
+  },
+
+  "cameras": {
+    "2702": {
+      "checkpoint": "woodlands",
+      "role": "approach",
+      "weight": 1.0,
+      "shows": "The ramp carrying Singapore traffic up onto the Causeway, plus the BKE carriageway leaving the checkpoint. This is the single best outbound queue signal at Woodlands.",
+      "outbound_label": "CAUSEWAY",
+      "inbound_label": "BKE"
+    },
+    "2701": {
+      "checkpoint": "woodlands",
+      "role": "crossing",
+      "weight": 0.7,
+      "shows": "The Causeway deck itself, both carriageways, looking across the strait. Shows whether vehicles are moving on the crossing or standing still.",
+      "outbound_label": "JOHOR",
+      "inbound_label": "WOODLANDS"
+    },
+    "2704": {
+      "checkpoint": "woodlands",
+      "role": "far_approach",
+      "weight": 0.5,
+      "shows": "The BKE roughly 2 km south of the checkpoint. Normally free-flowing even when the checkpoint is busy - traffic here means the queue has spilled back onto the expressway, which is a severe signal.",
+      "outbound_label": "WOODLANDS CHECKPOINT",
+      "inbound_label": "WOODLANDS AVE 3"
+    },
+    "4713": {
+      "checkpoint": "tuas",
+      "role": "approach",
+      "weight": 1.0,
+      "shows": "The ramp splitting towards Johor and back towards the AYE at Tuas Checkpoint. Best outbound queue signal at Tuas.",
+      "outbound_label": "JOHOR",
+      "inbound_label": "AYE"
+    },
+    "4703": {
+      "checkpoint": "tuas",
+      "role": "crossing",
+      "weight": 0.7,
+      "shows": "The Second Link bridge deck, both carriageways. Heavy goods traffic is normal here; judge spacing and movement, not vehicle type.",
+      "outbound_label": "JOHOR",
+      "inbound_label": null
+    },
+    "4712": {
+      "checkpoint": "tuas",
+      "role": "far_approach",
+      "weight": 0.5,
+      "shows": "The AYE roughly 800 m before Tuas Checkpoint. Normally free-flowing - queuing here means the checkpoint queue has reached the expressway.",
+      "outbound_label": "JOHOR",
+      "inbound_label": "CITY"
+    }
+  }
+}

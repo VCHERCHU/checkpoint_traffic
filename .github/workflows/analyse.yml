@@ -1,0 +1,100 @@
+name: Analyse checkpoints
+
+# A session is one dispatched run that polls for `duration_minutes`, then exits.
+# There is deliberately no `schedule:` trigger - GitHub's crons are routinely
+# delayed under load and can be dropped entirely, which would silently undermine
+# a freshness-critical app. A self-timed loop inside one job keeps the interval
+# honest.
+on:
+  workflow_dispatch:
+    inputs:
+      duration_minutes:
+        description: How long the session should run
+        default: '120'
+      interval_minutes:
+        description: Minutes between polls (cameras refresh every 5)
+        default: '5'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: analyse
+  cancel-in-progress: true    # a new dispatch replaces the running session
+
+jobs:
+  analyse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      DURATION: ${{ inputs.duration_minutes }}
+      INTERVAL: ${{ inputs.interval_minutes }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --quiet --upgrade pillow
+          npm install -g @anthropic-ai/claude-code
+          claude --version
+
+      - name: Seed history from the data branch
+        run: |
+          mkdir -p data work
+          curl -sfL "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/data/analysis.json" \
+            -o data/analysis.json && echo "seeded prior history" || echo "no prior data - starting fresh"
+
+      - name: Run session
+        run: |
+          set -uo pipefail
+          START=$(date +%s)
+          END=$(( START + DURATION * 60 ))
+          STEP=$(( INTERVAL * 60 ))
+          ENDS_ISO=$(TZ=Asia/Singapore date -d "@${END}" +%Y-%m-%dT%H:%M:%S%:z)
+          echo "session runs until ${ENDS_ISO} at ${INTERVAL}-minute intervals"
+
+          N=0
+          while :; do
+            N=$(( N + 1 ))
+            echo "::group::iteration ${N} ($(TZ=Asia/Singapore date +%H:%M:%S) SGT)"
+
+            python scripts/snapshot.py --workdir work
+            python scripts/build_prompt.py --workdir work
+
+            # A failed or malformed model call must not kill the session -
+            # publish.py degrades to a zero-confidence record and the client
+            # falls back to time-of-day patterns.
+            claude -p "$(cat work/prompt.txt)" \
+              --allowedTools Read \
+              --max-turns 12 \
+              --output-format json > work/claude.json || echo "claude call failed (exit $?)"
+
+            python scripts/publish.py \
+              --workdir work \
+              --session-ends "${ENDS_ISO}" \
+              --interval "${INTERVAL}"
+
+            bash scripts/push_data.sh
+            echo "::endgroup::"
+
+            [ "$(date +%s)" -ge "${END}" ] && break
+
+            # Align to the wall-clock interval boundary + 70s. Camera stills
+            # publish around :mm:50, and a naive `sleep 300` slowly drifts out
+            # of phase until it is fetching nearly-stale frames.
+            NOW=$(date +%s)
+            NEXT=$(( (NOW / STEP + 1) * STEP + 70 ))
+            [ $(( NEXT - NOW )) -lt 20 ] && NEXT=$(( NEXT + STEP ))
+            echo "sleeping $(( NEXT - NOW ))s"
+            sleep $(( NEXT - NOW ))
+
+            [ "$(date +%s)" -ge "${END}" ] && break
+          done
+          echo "session complete after ${N} iterations"
