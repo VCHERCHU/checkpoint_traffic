@@ -23,10 +23,12 @@
   // Below this confidence the camera reading is not trusted and the
   // time-of-day pattern is used instead.
   var CONFIDENCE_FLOOR = 0.5;
-  // A verdict closer than this is reported as "much the same".
+  // A verdict closer than this is reported as "too close to call".
   var TOSSUP_MARGIN = 8;
-  // Only show a trend arrow if the comparison point is this recent.
+  // Only show a trend tag if the comparison point is this recent.
   var TREND_MAX_AGE_MIN = 35;
+
+  var ARROW = { outbound: '→', inbound: '←' };
 
   var state = {
     data: null,
@@ -51,7 +53,7 @@
   }
 
   function ago(mins) {
-    if (mins === null) return 'unknown';
+    if (mins === null) return 'at an unknown time';
     if (mins < 1) return 'just now';
     if (mins < 60) return Math.round(mins) + ' min ago';
     var h = Math.floor(mins / 60);
@@ -189,17 +191,22 @@
     box.innerHTML = '';
     var win = ranked[0];
     var lose = ranked[1];
-    var margin = lose.penalty - win.penalty;
-    var tossup = margin < TOSSUP_MARGIN;
+    var tossup = (lose.penalty - win.penalty) < TOSSUP_MARGIN;
 
-    box.className = 'verdict sev-' + severity(win.reading.congestion);
+    box.className = 'verdict';
 
     box.appendChild(el('p', 'verdict-kicker',
-      tossup ? 'Not much in it' : 'Recommended'));
-    box.appendChild(el('p', 'verdict-name', win.cp.name));
-    box.appendChild(el('p', 'verdict-sub', 'via the ' + win.cp.crossing));
+      tossup ? 'Too close to call' : 'Take this one'));
 
-    var reason = el('p', 'verdict-reason');
+    var head = el('div', 'verdict-head');
+    var glyph = el('span', 'verdict-glyph', ARROW[state.direction]);
+    glyph.setAttribute('aria-hidden', 'true');
+    head.appendChild(glyph);
+    head.appendChild(el('h2', 'verdict-name', win.cp.short));
+    box.appendChild(head);
+
+    box.appendChild(el('p', 'verdict-via', 'via the ' + win.cp.crossing));
+
     var wc = severity(win.reading.congestion);
     var lc = severity(lose.reading.congestion);
     var bits = [];
@@ -211,82 +218,90 @@
     if (state.origin && state.dest) {
       var dm = Math.round(lose.travel.total - win.travel.total);
       if (Math.abs(dm) >= 3) {
-        bits.push(
-          dm > 0
-            ? win.cp.short + ' is also about ' + Math.abs(dm) + ' min less driving'
-            : 'though ' + win.cp.short + ' is about ' + Math.abs(dm) + ' min more driving'
-        );
+        bits.push(dm > 0
+          ? 'and it saves you roughly ' + Math.abs(dm) + ' min of driving'
+          : 'even though it costs you roughly ' + Math.abs(dm) + ' min of extra driving');
       }
     }
-    reason.textContent = bits.join('; ') + '.';
-    box.appendChild(reason);
+    box.appendChild(el('p', 'verdict-reason', bits.join(' ') + '.'));
 
     if (win.reading.usedPattern || lose.reading.usedPattern) {
       box.appendChild(el('p', 'verdict-flag',
-        'Cameras unclear — this is based on what these crossings are typically like at this time, not on what they look like now.'));
-    }
-
-    if (tossup) {
+        'The cameras are not readable right now, so this is what these crossings ' +
+        'are usually like at this time of day, not what they look like at this moment.'));
+    } else if (tossup) {
       box.appendChild(el('p', 'verdict-flag',
-        'The two are close enough that either is a reasonable choice.'));
+        'There is very little between them. Either one is a fine choice.'));
     }
   }
 
-  function renderCard(s) {
-    var card = el('article', 'card sev-' + severity(s.reading.congestion));
+  function renderPanel(s, isPick) {
+    var sev = severity(s.reading.congestion);
+    var panel = el('article', 'panel sev-' + sev + (isPick ? ' pick' : ' runner-up'));
 
-    var head = el('header', 'card-head');
-    head.appendChild(el('h2', null, s.cp.short));
-    var score = el('span', 'score',
-      s.reading.congestion === null ? '—' : s.reading.congestion.toFixed(1));
-    head.appendChild(score);
-    card.appendChild(head);
+    var bar = el('div', 'panel-bar');
+    var sig = el('span', 'signal');
+    sig.setAttribute('aria-hidden', 'true');
+    bar.appendChild(sig);
+    bar.appendChild(el('p', 'panel-name', s.cp.short));
+    bar.appendChild(el('p', 'panel-crossing', s.cp.crossing));
+    panel.appendChild(bar);
 
-    var meta = el('p', 'card-meta');
-    meta.appendChild(el('span', 'chip chip-' + severity(s.reading.congestion),
-      severity(s.reading.congestion)));
+    var body = el('div', 'panel-body');
 
+    var readout = el('div', 'readout');
+    readout.appendChild(el('span', 'readout-num',
+      s.reading.congestion === null ? '--' : s.reading.congestion.toFixed(1)));
+    readout.appendChild(el('span', 'readout-den', '/10'));
+    readout.appendChild(el('span', 'readout-word', sev));
+    body.appendChild(readout);
+
+    var tags = el('div', 'tags');
     var t = trendFor(s.key);
     if (t && !s.reading.usedPattern) {
-      var arrow = t.dir === 'up' ? '↑ building' : t.dir === 'down' ? '↓ clearing' : '→ steady';
-      meta.appendChild(el('span', 'chip chip-trend trend-' + t.dir,
-        arrow + ' (' + Math.round(t.mins) + ' min)'));
+      var label = t.dir === 'up'
+        ? '↑ building'
+        : t.dir === 'down' ? '↓ clearing' : '→ steady';
+      tags.appendChild(el('span', 'tag tag-' + t.dir,
+        label + ' ' + Math.round(t.mins) + 'm'));
     }
     if (s.reading.usedPattern) {
-      meta.appendChild(el('span', 'chip chip-pattern', 'typical for now'));
+      tags.appendChild(el('span', 'tag tag-guess', 'typical for now'));
     } else {
-      meta.appendChild(el('span', 'chip chip-conf',
-        'confidence ' + Math.round(s.reading.confidence * 100) + '%'));
+      tags.appendChild(el('span', 'tag',
+        'conf ' + Math.round(s.reading.confidence * 100) + '%'));
     }
-    card.appendChild(meta);
+    body.appendChild(tags);
 
     if (state.origin || state.dest) {
       var parts = [];
-      if (state.origin) parts.push(Math.round(s.travel.toCp) + ' min to reach');
-      if (state.dest) parts.push(Math.round(s.travel.onward) + ' min onward');
-      card.appendChild(el('p', 'card-travel', parts.join(' · ') + ' (est. driving)'));
+      if (state.origin) parts.push(Math.round(s.travel.toCp) + ' min there');
+      if (state.dest) parts.push(Math.round(s.travel.onward) + ' min on');
+      body.appendChild(el('p', 'travel',
+        parts.join('  ·  ') + '  (driving, est.)'));
     }
 
-    var shots = el('div', 'shots');
+    var shots = el('div', 'strip-shots');
     (s.cp.cameras || []).forEach(function (cam) {
       if (!cam.image) return;
       var fig = el('figure', 'shot');
       var img = document.createElement('img');
       img.src = cam.image;
-      img.alt = s.cp.short + ' camera ' + cam.id + ' (' + cam.role.replace('_', ' ') + ')';
+      img.alt = s.cp.short + ' camera ' + cam.id + ', ' + cam.role.replace('_', ' ');
       img.loading = 'lazy';
       // A still that will not load should collapse quietly rather than leave a
       // broken box under a verdict that is otherwise fine.
       img.addEventListener('error', function () { fig.classList.add('shot-missing'); });
       fig.appendChild(img);
       var cap = el('figcaption', null, cam.role.replace('_', ' '));
-      if (cam.note) cap.title = cam.note;
+      if (cam.note) cap.title = cam.id + ': ' + cam.note;
       fig.appendChild(cap);
       shots.appendChild(fig);
     });
-    card.appendChild(shots);
+    body.appendChild(shots);
 
-    return card;
+    panel.appendChild(body);
+    return panel;
   }
 
   function renderStatus() {
@@ -298,22 +313,21 @@
     // frame_timestamp, not source_timestamp: the feed reports itself as fresher
     // than the images it actually serves.
     var age = minutesSince(d.frame_timestamp || d.source_timestamp);
-    box.appendChild(el('span', null, 'Camera images taken ' + ago(age) + '.'));
+    box.appendChild(el('span', null, 'Pictures taken ' + ago(age)));
 
     var ends = d.session && d.session.ends_at;
     if (ends && new Date(ends).getTime() < Date.now()) {
       box.appendChild(el('span', 'stale',
-        ' Session ended — nothing is updating. Ask Claude to start another, or run the ' +
-        '"Analyse checkpoints" workflow in the repo.'));
+        'Nothing is updating — the session has finished'));
     } else if (ends) {
       var left = Math.max(0, (new Date(ends).getTime() - Date.now()) / 60000);
       box.appendChild(el('span', null,
-        ' Updating every ' + d.session.interval_minutes + ' min for another ' +
-        Math.round(left) + ' min.'));
+        'Refreshing every ' + d.session.interval_minutes + ' min for another ' +
+        Math.round(left) + ' min'));
     }
 
     if (d.degraded) {
-      box.appendChild(el('span', 'stale', ' Last analysis failed (' + d.degraded + ').'));
+      box.appendChild(el('span', 'stale', 'Last read failed: ' + d.degraded));
     }
   }
 
@@ -325,9 +339,9 @@
 
     renderVerdict(ranked);
 
-    var cards = $('cards');
-    cards.innerHTML = '';
-    ranked.forEach(function (s) { cards.appendChild(renderCard(s)); });
+    var panels = $('cards');
+    panels.innerHTML = '';
+    ranked.forEach(function (s, i) { panels.appendChild(renderPanel(s, i === 0)); });
 
     renderStatus();
   }
@@ -346,8 +360,8 @@
       .then(function (d) { state.data = d; render(); })
       .catch(function (e) {
         $('verdict').innerHTML = '';
-        $('verdict').appendChild(el('p', 'loading',
-          'No analysis published yet (' + e.message + '). Start a session and this will fill in.'));
+        $('verdict').appendChild(el('p', 'waiting',
+          'Nothing published yet (' + e.message + ') — start a session'));
       });
   }
 
@@ -385,14 +399,16 @@
       render();
       return;
     }
-    status.textContent = 'Looking up places…';
+    status.textContent = 'Looking those up…';
     $('go').disabled = true;
 
     // Sequential, not parallel: Nominatim asks for at most 1 request/second.
     geocode(oq)
       .then(function (o) {
         state.origin = oq ? o : null;
-        return dq ? new Promise(function (res) { setTimeout(function () { res(geocode(dq)); }, 1100); }) : null;
+        return dq
+          ? new Promise(function (res) { setTimeout(function () { res(geocode(dq)); }, 1100); })
+          : null;
       })
       .then(function (d) {
         state.dest = dq ? d : null;
@@ -400,9 +416,10 @@
         if (oq && !state.origin) missed.push('"' + oq + '"');
         if (dq && !state.dest) missed.push('"' + dq + '"');
         status.textContent = missed.length
-          ? 'Could not find ' + missed.join(' or ') + '. Try a more specific name.'
+          ? 'No match for ' + missed.join(' or ') + '. Try naming it more precisely.'
           : [state.origin && state.origin.label.split(',')[0],
-             state.dest && state.dest.label.split(',')[0]].filter(Boolean).join('  →  ');
+             state.dest && state.dest.label.split(',')[0]]
+              .filter(Boolean).join('  →  ');
         $('go').disabled = false;
         saveTrip();
         render();
@@ -410,10 +427,10 @@
   }
 
   function init() {
-    document.querySelectorAll('.dir-toggle button').forEach(function (b) {
+    document.querySelectorAll('.switch button').forEach(function (b) {
       b.addEventListener('click', function () {
         state.direction = b.dataset.dir;
-        document.querySelectorAll('.dir-toggle button').forEach(function (o) {
+        document.querySelectorAll('.switch button').forEach(function (o) {
           o.classList.toggle('on', o === b);
           o.setAttribute('aria-pressed', String(o === b));
         });

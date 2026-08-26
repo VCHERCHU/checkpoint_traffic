@@ -2,61 +2,71 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Checkpoint — Woodlands or Tuas?</title>
+<title>Which checkpoint?</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Which Singapore land checkpoint to use, from live LTA traffic cameras.">
+<meta name="description" content="Woodlands or Tuas? Read off six live Singapore traffic cameras.">
 <meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Archivo:wght@400;500;600;700&family=Martian+Mono:wght@500;600&display=swap">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
+<div class="hazard" aria-hidden="true"></div>
+
 <main>
 
-  <header class="top">
+  <header class="masthead">
+    <p class="eyebrow">SG &harr; MY &middot; land crossings</p>
     <h1>Which checkpoint?</h1>
-    <div class="dir-toggle" role="group" aria-label="Direction of travel">
-      <button type="button" data-dir="outbound" class="on" aria-pressed="true">SG&nbsp;&rarr;&nbsp;Malaysia</button>
-      <button type="button" data-dir="inbound" aria-pressed="false">Malaysia&nbsp;&rarr;&nbsp;SG</button>
-    </div>
   </header>
+
+  <div class="switch" role="group" aria-label="Direction of travel">
+    <button type="button" data-dir="outbound" class="on" aria-pressed="true">
+      <span class="switch-arrow" aria-hidden="true">&rarr;</span> To Malaysia
+    </button>
+    <button type="button" data-dir="inbound" aria-pressed="false">
+      <span class="switch-arrow" aria-hidden="true">&larr;</span> To Singapore
+    </button>
+  </div>
 
   <form class="trip" id="trip">
     <label>
-      <span>Starting from</span>
-      <input id="origin" type="text" autocomplete="off" placeholder="e.g. Woodlands Drive 50">
+      <span>From</span>
+      <input id="origin" type="text" autocomplete="off" placeholder="Woodlands Drive 50">
     </label>
     <label>
-      <span>Going to</span>
-      <input id="dest" type="text" autocomplete="off" placeholder="e.g. Legoland Malaysia">
+      <span>To</span>
+      <input id="dest" type="text" autocomplete="off" placeholder="Legoland Malaysia">
     </label>
-    <button type="submit" id="go">Update</button>
+    <button type="submit" id="go">Work it out</button>
     <p class="geo-status" id="geo-status" role="status"></p>
   </form>
 
   <section class="verdict" id="verdict" aria-live="polite">
-    <p class="loading">Loading the latest camera readings&hellip;</p>
+    <p class="waiting">Reading the cameras&hellip;</p>
   </section>
 
-  <section class="cards" id="cards"></section>
+  <section class="panels" id="cards"></section>
 
-  <footer class="status" id="status"></footer>
+  <footer class="strip" id="status"></footer>
 
-  <details class="caveat">
-    <summary>How this works, and what it can't tell you</summary>
+  <details class="smallprint">
+    <summary>What this can and can't tell you</summary>
     <p>
-      A GitHub Actions job reads six live LTA traffic cameras &mdash; three at each
-      checkpoint &mdash; and asks Claude to rate how stopped the traffic looks in
-      each direction. Those ratings are combined into one score per checkpoint.
+      Six live LTA cameras &mdash; three at each checkpoint &mdash; get read every
+      five minutes, and rated for how stopped the traffic looks in each direction.
     </p>
     <p>
-      <strong>It cannot tell you a waiting time.</strong> A still photograph shows
-      how heavy a queue looks, not how fast it is clearing, so there is no honest
-      way to turn it into minutes. Any minutes shown here are driving time
-      estimated from straight-line distance &mdash; never queue time.
+      <strong>It can't tell you a waiting time.</strong> A photograph shows how
+      heavy a queue looks, not how fast it's clearing. Every minute figure here is
+      estimated <em>driving</em> time &mdash; never time spent queueing.
     </p>
     <p>
-      Driving estimates use straight-line distance at an assumed average speed,
-      not a routed journey, so they under-read real road distance. Public
-      holidays are not accounted for in the fallback patterns.
+      Driving figures come from straight-line distance at an assumed 60&nbsp;km/h,
+      so they run short of real road distance. Public holidays aren't modelled,
+      and they're some of the worst days to cross.
     </p>
   </details>
 
