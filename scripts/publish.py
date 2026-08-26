@@ -168,9 +168,14 @@ def main():
         e["role"] = cfg["cameras"][cid]["role"]
 
     now = datetime.now(SGT)
+    # The feed's own timestamp runs 2-5 minutes ahead of the frames it serves, so
+    # reporting it as the data's age understates staleness. frame_timestamp is
+    # the newest image actually analysed - that is the honest number to show.
+    frame_ts = max((m["timestamp"] for m in meta["cameras"].values()), default=None)
     doc = {
         "generated_at": now.isoformat(timespec="seconds"),
         "source_timestamp": meta["feed_timestamp"],
+        "frame_timestamp": frame_ts,
         "degraded": degraded,
         "session": {"ends_at": args.session_ends, "interval_minutes": args.interval},
         "checkpoints": {},

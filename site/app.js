@@ -295,8 +295,10 @@
     var d = state.data;
     if (!d) return;
 
-    var age = minutesSince(d.source_timestamp);
-    box.appendChild(el('span', null, 'Cameras ' + ago(age) + '.'));
+    // frame_timestamp, not source_timestamp: the feed reports itself as fresher
+    // than the images it actually serves.
+    var age = minutesSince(d.frame_timestamp || d.source_timestamp);
+    box.appendChild(el('span', null, 'Camera images taken ' + ago(age) + '.'));
 
     var ends = d.session && d.session.ends_at;
     if (ends && new Date(ends).getTime() < Date.now()) {
