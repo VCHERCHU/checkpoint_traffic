@@ -1,6 +1,68 @@
 <!doctype html>
+<html lang="en">
+<head>
 <meta charset="utf-8">
-<title>checkpoint_traffic</title>
+<title>Checkpoint — Woodlands or Tuas?</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<h1>checkpoint_traffic</h1>
-<p>Placeholder page. Replace with the project site.</p>
+<meta name="description" content="Which Singapore land checkpoint to use, from live LTA traffic cameras.">
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main>
+
+  <header class="top">
+    <h1>Which checkpoint?</h1>
+    <div class="dir-toggle" role="group" aria-label="Direction of travel">
+      <button type="button" data-dir="outbound" class="on" aria-pressed="true">SG&nbsp;&rarr;&nbsp;Malaysia</button>
+      <button type="button" data-dir="inbound" aria-pressed="false">Malaysia&nbsp;&rarr;&nbsp;SG</button>
+    </div>
+  </header>
+
+  <form class="trip" id="trip">
+    <label>
+      <span>Starting from</span>
+      <input id="origin" type="text" autocomplete="off" placeholder="e.g. Woodlands Drive 50">
+    </label>
+    <label>
+      <span>Going to</span>
+      <input id="dest" type="text" autocomplete="off" placeholder="e.g. Legoland Malaysia">
+    </label>
+    <button type="submit" id="go">Update</button>
+    <p class="geo-status" id="geo-status" role="status"></p>
+  </form>
+
+  <section class="verdict" id="verdict" aria-live="polite">
+    <p class="loading">Loading the latest camera readings&hellip;</p>
+  </section>
+
+  <section class="cards" id="cards"></section>
+
+  <footer class="status" id="status"></footer>
+
+  <details class="caveat">
+    <summary>How this works, and what it can't tell you</summary>
+    <p>
+      A GitHub Actions job reads six live LTA traffic cameras &mdash; three at each
+      checkpoint &mdash; and asks Claude to rate how stopped the traffic looks in
+      each direction. Those ratings are combined into one score per checkpoint.
+    </p>
+    <p>
+      <strong>It cannot tell you a waiting time.</strong> A still photograph shows
+      how heavy a queue looks, not how fast it is clearing, so there is no honest
+      way to turn it into minutes. Any minutes shown here are driving time
+      estimated from straight-line distance &mdash; never queue time.
+    </p>
+    <p>
+      Driving estimates use straight-line distance at an assumed average speed,
+      not a routed journey, so they under-read real road distance. Public
+      holidays are not accounted for in the fallback patterns.
+    </p>
+  </details>
+
+</main>
+
+<script src="patterns.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
