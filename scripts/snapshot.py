@@ -8,12 +8,14 @@ describing the feed. The image host rejects urllib's default User-Agent with a
 import argparse
 import json
 import os
+import shutil
 import sys
 import urllib.request
 
 FEED = "https://api.data.gov.sg/v1/transport/traffic-images"
 UA = "checkpoint-traffic/0.1 (+https://github.com/VCHERCHU/checkpoint_traffic)"
 MAX_WIDTH = 900  # ~600 vision tokens per image at 16:9
+WEB_WIDTH = 640  # display copy published to the data branch
 
 
 def get(url, timeout=30):
@@ -21,18 +23,27 @@ def get(url, timeout=30):
     return urllib.request.urlopen(req, timeout=timeout)
 
 
-def downscale(path):
-    """Shrink in place. Skips silently if Pillow is unavailable."""
+def downscale(path, width=MAX_WIDTH, dest=None, quality=85):
+    """Shrink to `width`, writing to `dest` (default: in place).
+
+    Falls back to a byte copy when Pillow is unavailable so the pipeline still
+    works, just with larger images.
+    """
+    dest = dest or path
     try:
         from PIL import Image
     except ImportError:
         print("  (Pillow missing - keeping full resolution)", file=sys.stderr)
+        if dest != path:
+            shutil.copyfile(path, dest)
         return
     with Image.open(path) as im:
-        if im.width <= MAX_WIDTH:
+        if im.width <= width:
+            if dest != path:
+                shutil.copyfile(path, dest)
             return
-        h = round(im.height * MAX_WIDTH / im.width)
-        im.resize((MAX_WIDTH, h), Image.LANCZOS).save(path, "JPEG", quality=85)
+        h = round(im.height * width / im.width)
+        im.resize((width, h), Image.LANCZOS).save(dest, "JPEG", quality=quality)
 
 
 def main():
@@ -55,7 +66,9 @@ def main():
         path = os.path.join(args.workdir, cid + ".jpg")
         with open(path, "wb") as f:
             f.write(get(cam["image"]).read())
-        downscale(path)
+        web = os.path.join(args.workdir, "cam-" + cid + ".jpg")
+        downscale(path)                                   # what the model reads
+        downscale(path, WEB_WIDTH, web, quality=75)       # what the page shows
         meta["cameras"][cid] = {
             "image": cam["image"],
             "timestamp": cam["timestamp"],

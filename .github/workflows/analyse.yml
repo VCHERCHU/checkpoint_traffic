@@ -81,7 +81,7 @@ jobs:
               --session-ends "${ENDS_ISO}" \
               --interval "${INTERVAL}"
 
-            bash scripts/push_data.sh
+            bash scripts/push_data.sh data/analysis.json work
             echo "::endgroup::"
 
             [ "$(date +%s)" -ge "${END}" ] && break

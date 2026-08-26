@@ -275,6 +275,9 @@
       img.src = cam.image;
       img.alt = s.cp.short + ' camera ' + cam.id + ' (' + cam.role.replace('_', ' ') + ')';
       img.loading = 'lazy';
+      // A still that will not load should collapse quietly rather than leave a
+      // broken box under a verdict that is otherwise fine.
+      img.addEventListener('error', function () { fig.classList.add('shot-missing'); });
       fig.appendChild(img);
       var cap = el('figcaption', null, cam.role.replace('_', ' '));
       if (cam.note) cap.title = cam.note;

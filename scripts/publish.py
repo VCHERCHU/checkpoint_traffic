@@ -134,6 +134,8 @@ def main():
     ap.add_argument("--out", default="data/analysis.json")
     ap.add_argument("--session-ends", default=None, help="ISO8601 end of this session")
     ap.add_argument("--interval", type=int, default=5)
+    ap.add_argument("--image-base",
+                    default="https://raw.githubusercontent.com/VCHERCHU/checkpoint_traffic/data")
     args = ap.parse_args()
 
     cfg = json.load(open(args.config))
@@ -153,7 +155,15 @@ def main():
     for cid, e in cams.items():
         e["note"] = e["note"] or ""
         m = meta["cameras"].get(cid)
-        e["image"] = m["image"] if m else None
+        # The LTA image host sends application/octet-stream with nosniff, so a
+        # browser refuses to render those URLs in an <img>. Serve our own copy
+        # from the data branch instead; ?v= changes only when the frame does.
+        e["image"] = (
+            "{}/cam-{}.jpg?v={}".format(args.image_base.rstrip("/"), cid,
+                                        int(datetime.fromisoformat(m["timestamp"]).timestamp()))
+            if m else None
+        )
+        e["source_image"] = m["image"] if m else None
         e["timestamp"] = m["timestamp"] if m else None
         e["role"] = cfg["cameras"][cid]["role"]
 

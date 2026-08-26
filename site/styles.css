@@ -288,3 +288,14 @@ main {
 .caveat summary { cursor: pointer; font-weight: 600; color: var(--text); }
 .caveat p { margin: 10px 0 0; }
 .caveat strong { color: var(--text); }
+
+.shot-missing img { display: none; }
+.shot-missing::before {
+  content: "";
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+  border: 1px dashed var(--border);
+  background: var(--bg);
+}
