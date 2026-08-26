@@ -15,8 +15,19 @@ relevant labels are given below.
 - **inbound** = traffic heading from Malaysia back into Singapore (towards
   WOODLANDS, the BKE, the AYE, or the CITY).
 
+Singapore and Malaysia both drive on the **left**. Where a camera has a
+`Direction:` note below, follow it - on the two crossing-deck cameras the yellow
+labels mark the road's orientation rather than one specific carriageway, and the
+note tells you how to tell the two apart.
+
 If a direction's carriageway is not visible or not identifiable in a given
 camera, use `null` for that direction rather than guessing.
+
+**Cross-check before you answer.** For each checkpoint, the approach camera and
+the crossing camera should broadly agree. If the approach ramp is queued solid
+but the crossing deck looks empty in the same direction, you have most likely
+swapped the two carriageways - re-check, and if still unsure lower your
+confidence on the crossing camera rather than reporting a contradiction.
 
 ## Congestion scale
 

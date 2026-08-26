@@ -88,23 +88,42 @@ def validate(payload, wanted):
 
 
 def aggregate(cfg, cams, cp_key, direction):
-    """Weighted mean across a checkpoint's cameras for one direction."""
+    """Combine a checkpoint's cameras into one score for one direction.
+
+    The approach ramp is the primary signal and the crossing deck is blended in
+    at lower weight. The far-approach camera is an ESCALATOR ONLY: it can raise
+    the score when the queue has spilled back onto the expressway, but it never
+    lowers it - free flow 1-2 km back is the normal state even when the
+    checkpoint itself is gridlocked, so averaging it in would mask a real queue.
+    """
     num = den = cnum = cden = 0.0
+    spill = None
     for cid in cfg["checkpoints"][cp_key]["cameras"]:
         e = cams.get(cid)
         if not e:
             continue
-        w = cfg["cameras"][cid]["weight"]
+        conf = cfg["cameras"][cid]
+        w = conf["weight"]
         cnum += w * e["confidence"]
         cden += w
         score = e[direction]
         if score is None or e["image_quality"] == "unusable":
             continue
+        if conf["role"] == "far_approach":
+            spill = score if spill is None else max(spill, score)
+            continue
         ew = w * max(e["confidence"], 0.05)  # keep a sliver of weight for low confidence
         num += ew * score
         den += ew
-    score = round(num / den, 1) if den else None
+
+    base = num / den if den else None
+    if spill is not None:
+        base = spill if base is None else max(base, spill)
+
+    score = round(base, 1) if base is not None else None
     conf = round(cnum / cden, 2) if cden else 0.0
+    if score is None:
+        conf = 0.0  # no reading means no confidence, not a little confidence in nothing
     return {"congestion": score, "label": label_for(score), "confidence": conf}
 
 

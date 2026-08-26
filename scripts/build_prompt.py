@@ -24,7 +24,10 @@ for key, cp in cfg["checkpoints"].items():
         in_l = cam["inbound_label"]
         labels = f"outbound is labelled `{out_l}`"
         labels += f", inbound is labelled `{in_l}`" if in_l else ", inbound is not separately labelled"
-        lines.append(f"- **`{cid}.jpg`** ({cam['role']}) - {cam['shows']} In this frame, {labels}.")
+        entry = f"- **`{cid}.jpg`** ({cam['role']}) - {cam['shows']} In this frame, {labels}."
+        if cam.get("direction_hint"):
+            entry += chr(10) + "  - **Direction:** " + cam["direction_hint"]
+        lines.append(entry)
 
 prompt = open(args.template).read().replace("{{CAMERAS}}", "\n".join(lines))
 out = os.path.join(args.workdir, "prompt.txt")

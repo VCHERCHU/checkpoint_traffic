@@ -1,23 +1,35 @@
 {
   "_note": "Camera roles were established by visually inspecting one daylight frame from each camera on 2026-08-26. LTA burns direction labels into the images; the analysis prompt relies on those labels rather than on hardcoded carriageway geometry. Night behaviour is NOT verified - the model reports image_quality per run and the client falls back to patterns when confidence is low.",
-
   "checkpoints": {
     "woodlands": {
       "name": "Woodlands Checkpoint",
       "short": "Woodlands",
       "crossing": "Causeway",
-      "coords": [1.44555, 103.76834],
-      "cameras": ["2702", "2701", "2704"]
+      "coords": [
+        1.44555,
+        103.76834
+      ],
+      "cameras": [
+        "2702",
+        "2701",
+        "2704"
+      ]
     },
     "tuas": {
       "name": "Tuas Checkpoint",
       "short": "Tuas",
       "crossing": "Second Link",
-      "coords": [1.34765, 103.63670],
-      "cameras": ["4713", "4703", "4712"]
+      "coords": [
+        1.34765,
+        103.6367
+      ],
+      "cameras": [
+        "4713",
+        "4703",
+        "4712"
+      ]
     }
   },
-
   "cameras": {
     "2702": {
       "checkpoint": "woodlands",
@@ -30,10 +42,11 @@
     "2701": {
       "checkpoint": "woodlands",
       "role": "crossing",
-      "weight": 0.7,
+      "weight": 0.4,
       "shows": "The Causeway deck itself, both carriageways, looking across the strait. Shows whether vehicles are moving on the crossing or standing still.",
       "outbound_label": "JOHOR",
-      "inbound_label": "WOODLANDS"
+      "inbound_label": "WOODLANDS",
+      "direction_hint": "The JOHOR and WOODLANDS labels mark the road's orientation, NOT one specific carriageway. Looking towards Johor is up and to the right. Singapore and Malaysia both drive on the LEFT, so the Johor-bound carriageway is the seaward one (the upper-left of the pair) and the Woodlands-bound carriageway is the one nearer the water pipes and railway line."
     },
     "2704": {
       "checkpoint": "woodlands",
@@ -54,10 +67,11 @@
     "4703": {
       "checkpoint": "tuas",
       "role": "crossing",
-      "weight": 0.7,
+      "weight": 0.4,
       "shows": "The Second Link bridge deck, both carriageways. Heavy goods traffic is normal here; judge spacing and movement, not vehicle type.",
       "outbound_label": "JOHOR",
-      "inbound_label": null
+      "inbound_label": null,
+      "direction_hint": "Only the Johor direction is labelled and the two carriageways are hard to tell apart here. Rate the direction you can actually identify and use null for the other rather than guessing."
     },
     "4712": {
       "checkpoint": "tuas",
@@ -67,5 +81,6 @@
       "outbound_label": "JOHOR",
       "inbound_label": "CITY"
     }
-  }
+  },
+  "_aggregation": "approach is the primary signal; crossing is blended in at lower weight; far_approach is an ESCALATOR ONLY - it can raise a checkpoint's score when the queue has spilled back onto the expressway, but never lowers it, because free flow that far back is normal even during a severe queue."
 }
