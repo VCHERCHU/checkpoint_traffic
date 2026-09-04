@@ -1,0 +1,212 @@
+{
+  "generated_at": "2026-09-04T16:27:42+08:00",
+  "source_timestamp": "2026-09-04T16:25:55+08:00",
+  "frame_timestamp": "2026-09-04T16:25:55+08:00",
+  "degraded": null,
+  "session": {
+    "ends_at": "2026-09-04T16:27:34+08:00",
+    "interval_minutes": 5
+  },
+  "checkpoints": {
+    "woodlands": {
+      "name": "Woodlands Checkpoint",
+      "short": "Woodlands",
+      "crossing": "Causeway",
+      "coords": [
+        1.44555,
+        103.76834
+      ],
+      "outbound": {
+        "congestion": 6.9,
+        "label": "heavy",
+        "confidence": 0.76
+      },
+      "inbound": {
+        "congestion": 2.0,
+        "label": "light",
+        "confidence": 0.76
+      },
+      "cameras": [
+        {
+          "outbound": 8.0,
+          "inbound": 2.0,
+          "image_quality": "good",
+          "confidence": 0.85,
+          "note": "CAUSEWAY lanes are bumper-to-bumper with buses and trucks queued on the ramp, while the BKE carriageway on the left has only a few spaced-out vehicles moving freely.",
+          "image": "https://raw.githubusercontent.com/VCHERCHU/checkpoint_traffic/data/cam-2702.jpg?v=1788510355",
+          "source_image": "https://images.data.gov.sg/api/traffic-images/2026/09/c7ecca1e-59cd-417c-a810-94fc93568b90.jpg",
+          "timestamp": "2026-09-04T16:25:55+08:00",
+          "role": "approach",
+          "id": "2702"
+        },
+        {
+          "outbound": 2.0,
+          "inbound": 2.0,
+          "image_quality": "good",
+          "confidence": 0.5,
+          "note": "Both carriageways on the mid-strait causeway deck show only a handful of well-spaced buses and cars moving, despite the severe queue visible at the Singapore-side ramp (2702), suggesting the bottlenec",
+          "image": "https://raw.githubusercontent.com/VCHERCHU/checkpoint_traffic/data/cam-2701.jpg?v=1788510355",
+          "source_image": "https://images.data.gov.sg/api/traffic-images/2026/09/0a1c3d1e-bd6c-4b79-926b-479d67994c1c.jpg",
+          "timestamp": "2026-09-04T16:25:55+08:00",
+          "role": "crossing",
+          "id": "2701"
+        },
+        {
+          "outbound": 0.0,
+          "inbound": 1.0,
+          "image_quality": "good",
+          "confidence": 0.8,
+          "note": "The near carriageway toward Woodlands Checkpoint is completely empty, and the far carriageway toward Woodlands Ave 3 has only light traffic moving at speed.",
+          "image": "https://raw.githubusercontent.com/VCHERCHU/checkpoint_traffic/data/cam-2704.jpg?v=1788510355",
+          "source_image": "https://images.data.gov.sg/api/traffic-images/2026/09/37420e74-dbd6-4c18-a67e-a29f45b15fb8.jpg",
+          "timestamp": "2026-09-04T16:25:55+08:00",
+          "role": "far_approach",
+          "id": "2704"
+        }
+      ]
+    },
+    "tuas": {
+      "name": "Tuas Checkpoint",
+      "short": "Tuas",
+      "crossing": "Second Link",
+      "coords": [
+        1.34765,
+        103.6367
+      ],
+      "outbound": {
+        "congestion": 8.6,
+        "label": "severe",
+        "confidence": 0.78
+      },
+      "inbound": {
+        "congestion": 0.0,
+        "label": "clear",
+        "confidence": 0.78
+      },
+      "cameras": [
+        {
+          "outbound": 9.0,
+          "inbound": 0.0,
+          "image_quality": "good",
+          "confidence": 0.85,
+          "note": "The Johor-bound side is packed with stationary/stop-start cars and motorcycles around the roundabout and checkpoint plaza, while the AYE ramp on the left is completely empty.",
+          "image": "https://raw.githubusercontent.com/VCHERCHU/checkpoint_traffic/data/cam-4713.jpg?v=1788510355",
+          "source_image": "https://images.data.gov.sg/api/traffic-images/2026/09/8a88ca45-9b02-448e-8dbf-d4c471c57143.jpg",
+          "timestamp": "2026-09-04T16:25:55+08:00",
+          "role": "approach",
+          "id": "4713"
+        },
+        {
+          "outbound": 7.0,
+          "inbound": null,
+          "image_quality": "good",
+          "confidence": 0.5,
+          "note": "The Johor-bound bridge deck carries a dense, tightly-spaced convoy of trucks and motorcycles consistent with the heavy queue seen at the approach camera; the other carriageway isn't reliably distingui",
+          "image": "https://raw.githubusercontent.com/VCHERCHU/checkpoint_traffic/data/cam-4703.jpg?v=1788510355",
+          "source_image": "https://images.data.gov.sg/api/traffic-images/2026/09/72731c06-0906-4ed6-9d6f-b5e26154b4ac.jpg",
+          "timestamp": "2026-09-04T16:25:55+08:00",
+          "role": "crossing",
+          "id": "4703"
+        },
+        {
+          "outbound": 1.0,
+          "inbound": 0.0,
+          "image_quality": "good",
+          "confidence": 0.85,
+          "note": "The Johor-bound lane has just a truck and a motorcycle moving freely, and the City-bound lane is completely empty, showing no spillback this far from the checkpoint.",
+          "image": "https://raw.githubusercontent.com/VCHERCHU/checkpoint_traffic/data/cam-4712.jpg?v=1788510355",
+          "source_image": "https://images.data.gov.sg/api/traffic-images/2026/09/7e76c6a0-b0cc-46e3-8226-995b29a81a63.jpg",
+          "timestamp": "2026-09-04T16:25:55+08:00",
+          "role": "far_approach",
+          "id": "4712"
+        }
+      ]
+    }
+  },
+  "history": [
+    {
+      "t": "2026-09-04T15:27:56+08:00",
+      "woodlands_outbound": 8.0,
+      "woodlands_inbound": 1.0,
+      "tuas_outbound": 7.6,
+      "tuas_inbound": 1.0
+    },
+    {
+      "t": "2026-09-04T15:32:26+08:00",
+      "woodlands_outbound": 8.0,
+      "woodlands_inbound": 2.2,
+      "tuas_outbound": 7.7,
+      "tuas_inbound": 2.0
+    },
+    {
+      "t": "2026-09-04T15:37:17+08:00",
+      "woodlands_outbound": 8.7,
+      "woodlands_inbound": 1.2,
+      "tuas_outbound": 7.6,
+      "tuas_inbound": 1.0
+    },
+    {
+      "t": "2026-09-04T15:42:54+08:00",
+      "woodlands_outbound": 9.0,
+      "woodlands_inbound": 2.2,
+      "tuas_outbound": 8.3,
+      "tuas_inbound": 1.0
+    },
+    {
+      "t": "2026-09-04T15:51:01+08:00",
+      "woodlands_outbound": 8.7,
+      "woodlands_inbound": 2.5,
+      "tuas_outbound": 7.7,
+      "tuas_inbound": 1.0
+    },
+    {
+      "t": "2026-09-04T15:57:34+08:00",
+      "woodlands_outbound": 8.0,
+      "woodlands_inbound": 1.5,
+      "tuas_outbound": 7.8,
+      "tuas_inbound": 0.0
+    },
+    {
+      "t": "2026-09-04T16:02:51+08:00",
+      "woodlands_outbound": 8.7,
+      "woodlands_inbound": 2.0,
+      "tuas_outbound": 8.0,
+      "tuas_inbound": 2.0
+    },
+    {
+      "t": "2026-09-04T16:08:38+08:00",
+      "woodlands_outbound": 7.7,
+      "woodlands_inbound": 2.2,
+      "tuas_outbound": 8.5,
+      "tuas_inbound": 1.0
+    },
+    {
+      "t": "2026-09-04T16:12:42+08:00",
+      "woodlands_outbound": 7.2,
+      "woodlands_inbound": 1.1,
+      "tuas_outbound": 8.0,
+      "tuas_inbound": 0.0
+    },
+    {
+      "t": "2026-09-04T16:17:46+08:00",
+      "woodlands_outbound": 7.4,
+      "woodlands_inbound": 1.1,
+      "tuas_outbound": 7.8,
+      "tuas_inbound": 1.0
+    },
+    {
+      "t": "2026-09-04T16:22:32+08:00",
+      "woodlands_outbound": 8.0,
+      "woodlands_inbound": 2.0,
+      "tuas_outbound": 7.6,
+      "tuas_inbound": 1.0
+    },
+    {
+      "t": "2026-09-04T16:27:42+08:00",
+      "woodlands_outbound": 6.9,
+      "woodlands_inbound": 2.0,
+      "tuas_outbound": 8.6,
+      "tuas_inbound": 0.0
+    }
+  ]
+}
